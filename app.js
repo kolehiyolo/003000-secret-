@@ -22,9 +22,21 @@ app.get(`/`, function(req, res) {
     res.render(`home`);
 }) ; 
 
+// -* GET Login
+app.get(`/login`, function(req, res) {
+    console.log(`GET /login`); 
+
+    res.render(`login`);
+}) ; 
+
+// -* GET Register
+app.get(`/register`, function(req, res) {
+    console.log(`GET /register`); 
+
+    res.render(`register`);
+}) ; 
+
 // -* Listener
 app.listen(port, function() {
     console.log(`Server started on ${port}`); 
 });
-
-// Stuff
