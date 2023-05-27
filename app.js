@@ -6,6 +6,7 @@ const bodyParser = require(`body-parser`);
 const ejs = require(`ejs`);
 const mongoose = require(`mongoose`);
 const encrypt = require(`mongoose-encryption`);
+const md5 = require(`md5`);
 
 // * Setting up Express
 const app = express(); // Setting up app head
@@ -73,7 +74,7 @@ app.post(`/register`, function (req, res) {
 
     const newUser = new User({
         email: req.body.username,
-        password: req.body.password
+        password: md5(req.body.password)
     });
 
     console.log(`-New user created:`);
@@ -102,7 +103,7 @@ app.post(`/login`, function (req, res) {
     console.log(`-Processing user login`);
 
     const username = req.body.username;
-    const password = req.body.password;
+    const password = md5(req.body.password);
     console.log(`-User-given username+password:`);
     console.log(username);
     console.log(password);
