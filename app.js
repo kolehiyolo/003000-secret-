@@ -81,6 +81,50 @@ app.post(`/register`, function(req, res) {
     })
 }) ; 
 
+// -* POST Login
+app.post(`/login`, function(req, res) {
+    console.log(`\n`); 
+    console.log(`POST /login`); 
+    console.log(`-Processing user login`); 
+    
+    const username = req.body.username;
+    const password = req.body.password;
+    console.log(`-User-given username+password:`); 
+    console.log(username); 
+    console.log(password); 
+
+    console.log(`-Finding a registered user that matches the given username`);
+    User.collection.findOne({
+        'email': username,
+    }, (err, user) => {
+        if (err) {
+            console.log(`-ERROR ENCOUNTERED:`); 
+            console.log(err); 
+        } else {
+            if (user) {
+                console.log(`-User Found:`); 
+                console.log(user); 
+                
+                console.log(`-Checking if the user has the right password`); 
+                if (user.password === password) {
+                    console.log(`-Password matches`); 
+                    console.log(`-Rendering "Secrets" Page`); 
+                    res.render(`secrets`);
+                } else {
+                    console.log(`-Password doesn't match`); 
+                    console.log(`-Rendering "Login" Page`); 
+                    res.render(`login`);
+                }
+            } else {
+                console.log(`-No such user found`); 
+                console.log(`-Rendering "Login" Page`); 
+                res.render(`login`);
+            }
+        }
+    });
+
+}) ; 
+
 // -* Listener
 app.listen(port, function() {
     console.log(`Server started on ${port}`); 
