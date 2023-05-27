@@ -4,6 +4,7 @@ const express = require(`express`);
 const bodyParser = require(`body-parser`);
 const ejs = require(`ejs`);
 const mongoose = require(`mongoose`);
+const encrypt = require(`mongoose-encrypt`);
 
 // * Setting up Express
 const app = express(); // Setting up app head
@@ -20,10 +21,16 @@ mongoose.connect(`mongodb://127.0.0.1:27017/secretsDB`, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }); // Establishing connection to local MongoDB instance
-const User = new mongoose.model(`User`, {
+const userSchema = new mongoose.Schema({
     email: String,
     password: String
-}); // Creating a new collection "User" using the indicated schema
+}); // Defining the user schema
+const secret = "Thisisourlittlesecret.";
+userSchema.plugin(encrypt, {
+    secret: secret,
+    encryptedFields: ["password"]
+});
+const User = new mongoose.model(`User`, userSchema); // Creating a new collection "User" using the user schema
 
 // * EXPRESS ROUTES
 // -* GET Home
