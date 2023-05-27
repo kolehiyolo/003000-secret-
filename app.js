@@ -1,5 +1,6 @@
 //jshint esversion:6
 // * Importing App NPM Dependencies
+require(`dotenv`).config();
 const express = require(`express`);
 const bodyParser = require(`body-parser`);
 const ejs = require(`ejs`);
@@ -27,7 +28,7 @@ const userSchema = new mongoose.Schema({
 }); // Defining the user schema
 
 // * Setting up Mongoose-Encryption
-const secret = "Thisisourlittlesecret."; // ? This is the secret key, I believe
+const secret = process.env.SECRET; // ? This is the secret key, I believe
 userSchema.plugin(encrypt, {
     secret: secret,
     encryptedFields: ["password"]
