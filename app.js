@@ -8,6 +8,9 @@ const mongoose = require(`mongoose`);
 const encrypt = require(`mongoose-encryption`);
 const md5 = require(`md5`);
 const bcrypt = require(`bcrypt`);
+const session = require(`express-session`);
+const passport = require(`passport`);
+const passportLocalMongoose = require(`passport-local-mongoose`);
 
 // * Setting up Express
 const app = express(); // Setting up app head
@@ -18,6 +21,16 @@ app.use(bodyParser.urlencoded({
 })); // For parsing req.body data from POST forms
 const port = 3000; // Port number; Adjustable depending on eventual hosting config
 
+// ! Proper Docu Needed
+app.use(session({
+    secret: "Our little secret.",
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+// ! Proper Docu Needed
 
 // * Setting up MongoDB
 mongoose.connect(`mongodb://127.0.0.1:27017/secretsDB`, {
@@ -36,7 +49,11 @@ userSchema.plugin(encrypt, {
     encryptedFields: ["password"]
 }); // Setting up the encryption plugin within the userSchema so that any save or find done on the model will trigger mongoose-encryption's methods
 // This only affects the "password" field as indicated
+userSchema.plugin(passportLocalMongoose); // ! Proper Docu Needed
 const User = new mongoose.model(`User`, userSchema); // Creating a new collection "User" using the user schema
+passport.use(User.createStrategy()); // ! Proper Docu Needed
+passport.serializeUser(User.serializeUser()); // ! Proper Docu Needed
+passport.deserializeUser(User.deserializeUser()); // ! Proper Docu Needed
 const saltRounds = 10;
 
 // * EXPRESS ROUTES
@@ -71,89 +88,14 @@ app.get(`/register`, function (req, res) {
 app.post(`/register`, function (req, res) {
     console.log(`\n`);
     console.log(`POST /register`);
-    console.log(`-Processing user registration`);
-    console.log(`-Salting+Hashing the password with bcrypt`);
 
-    bcrypt.hash(req.body.password, saltRounds, (hashError, hash) => {
-        if (hashError) {
-            console.log(`-ERROR ENCOUNTERED:`);
-            console.log(hashError);
-        } else {
-            console.log(`-Creating new user based on inputs and encrypted password`);
-            const newUser = new User({
-                email: req.body.username,
-                password: hash
-            })
 
-            console.log(`-New user created:`);
-            console.log(newUser);
-
-            // ? Mongoose's .save() no longer accepts callbacks
-            // ? Using promises instead after queries
-            console.log(`-Saving new user to "User" collection`);
-            newUser.save()
-                .then((result) => {
-                    console.log(`-Save successful:`);
-                    console.log(result);
-                    console.log(`-Rendering "Secrets" Page`);
-                    res.render(`secrets`);
-                })
-                .catch((err) => {
-                    console.log(`-ERROR ENCOUNTERED:`);
-                    console.log(err);
-                });
-
-        };
-    });
 });
 
 // -* POST Login
 app.post(`/login`, function (req, res) {
     console.log(`\n`);
     console.log(`POST /login`);
-    console.log(`-Processing user login`);
-    console.log(`-Salting+Hashing the password with bcrypt`);
-
-    const username = req.body.username;
-    const password = req.body.password;
-    console.log(`-User-given username+password:`);
-    console.log(username);
-    console.log(password);
-
-    console.log(`-Finding a registered user that matches the given username`);
-
-    // ? Mongoose's .find() no longer accepts callbacks
-    // ? Using promises instead after queries
-    User.find({
-            'email': username,
-        }).then((result) => {
-            if (result) {
-                console.log(`-User Found:`);
-                const user = result[0];
-                console.log(user);
-
-                console.log(`-Checking if the user has the right password`);
-                bcrypt.compare(password, user.password, (err, passwordsMatch) => {
-                    if (passwordsMatch) {
-                        console.log(`-Password matches`);
-                        console.log(`-Rendering "Secrets" Page`);
-                        res.render(`secrets`);
-                    } else {
-                        console.log(`-Password doesn't match`);
-                        console.log(`-Rendering "Login" Page`);
-                        res.render(`login`);
-                    }
-                })
-            } else {
-                console.log(`-No such user found`);
-                console.log(`-Rendering "Login" Page`);
-                res.render(`login`);
-            }
-        })
-        .catch((err) => {
-            console.log(`-ERROR ENCOUNTERED:`);
-            console.log(err);
-        });
 
 });
 
