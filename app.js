@@ -72,7 +72,7 @@ app.get(`/`, function (req, res) {
     } else {
         console.log(`-User is not logged in`);
         console.log(`-Rendering home page`);
-        res.render(`/`);
+        res.render(`home`);
     }
 });
 
