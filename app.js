@@ -63,9 +63,17 @@ passport.deserializeUser((user, done) =>{
 app.get(`/`, function (req, res) {
     console.log(`\n`);
     console.log(`GET /`);
-    console.log(`-Rendering home page`);
 
-    res.render(`home`);
+    console.log(`-Confirming if User is logged in to determine response`); 
+    if (req.isAuthenticated()) {
+        console.log(`-User is logged in`);
+        console.log(`-Redirecting to GET /secrets`);
+        res.redirect(`/secrets`);
+    } else {
+        console.log(`-User is not logged in`);
+        console.log(`-Rendering home page`);
+        res.render(`/`);
+    }
 });
 
 // -* GET Login
