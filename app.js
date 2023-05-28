@@ -7,6 +7,7 @@ const ejs = require(`ejs`);
 const mongoose = require(`mongoose`);
 const encrypt = require(`mongoose-encryption`);
 const md5 = require(`md5`);
+const bcrypt = require(`bcrypt`);
 
 // * Setting up Express
 const app = express(); // Setting up app head
@@ -36,6 +37,7 @@ userSchema.plugin(encrypt, {
 }); // Setting up the encryption plugin within the userSchema so that any save or find done on the model will trigger mongoose-encryption's methods
 // This only affects the "password" field as indicated
 const User = new mongoose.model(`User`, userSchema); // Creating a new collection "User" using the user schema
+const saltRounds = 10;
 
 // * EXPRESS ROUTES
 // -* GET Home
@@ -70,29 +72,38 @@ app.post(`/register`, function (req, res) {
     console.log(`\n`);
     console.log(`POST /register`);
     console.log(`-Processing user registration`);
-    console.log(`-Creating new user based on inputs`);
+    console.log(`-Salting+Hashing the password with bcrypt`);
 
-    const newUser = new User({
-        email: req.body.username,
-        password: md5(req.body.password)
-    });
+    bcrypt.hash(req.body.password, saltRounds, (hashError, hash) => {
+        if (hashError) {
+            console.log(`-ERROR ENCOUNTERED:`);
+            console.log(hashError);
+        } else {
+            console.log(`-Creating new user based on inputs and encrypted password`);
+            const newUser = new User({
+                email: req.body.username,
+                password: hash
+            })
 
-    console.log(`-New user created:`);
-    console.log(newUser);
+            console.log(`-New user created:`);
+            console.log(newUser);
 
-    // ? Mongoose's .save() no longer accepts callbacks
-    // ? Using promises instead after queries
-    console.log(`-Saving new user to "User" collection`);
-    newUser.save()
-    .then((result) => {
-        console.log(`-Save successful:`);
-        console.log(result); 
-        console.log(`-Rendering "Secrets" Page`);
-        res.render(`secrets`);
-    })
-    .catch((err) => {
-        console.log(`-ERROR ENCOUNTERED:`);
-        console.log(err);
+            // ? Mongoose's .save() no longer accepts callbacks
+            // ? Using promises instead after queries
+            console.log(`-Saving new user to "User" collection`);
+            newUser.save()
+                .then((result) => {
+                    console.log(`-Save successful:`);
+                    console.log(result);
+                    console.log(`-Rendering "Secrets" Page`);
+                    res.render(`secrets`);
+                })
+                .catch((err) => {
+                    console.log(`-ERROR ENCOUNTERED:`);
+                    console.log(err);
+                });
+
+        };
     });
 });
 
@@ -101,9 +112,10 @@ app.post(`/login`, function (req, res) {
     console.log(`\n`);
     console.log(`POST /login`);
     console.log(`-Processing user login`);
+    console.log(`-Salting+Hashing the password with bcrypt`);
 
     const username = req.body.username;
-    const password = md5(req.body.password);
+    const password = req.body.password;
     console.log(`-User-given username+password:`);
     console.log(username);
     console.log(password);
@@ -113,33 +125,36 @@ app.post(`/login`, function (req, res) {
     // ? Mongoose's .find() no longer accepts callbacks
     // ? Using promises instead after queries
     User.find({
-        'email': username,
-    }).then((result) => {
-        if (result) {
-            console.log(`-User Found:`);
-            const user = result[0];
-            console.log(user);
+            'email': username,
+        }).then((result) => {
+            if (result) {
+                console.log(`-User Found:`);
+                const user = result[0];
+                console.log(user);
 
-            console.log(`-Checking if the user has the right password`);
-            if (user.password === password) {
-                console.log(`-Password matches`);
-                console.log(`-Rendering "Secrets" Page`);
-                res.render(`secrets`);
+                console.log(`-Checking if the user has the right password`);
+                bcrypt.compare(password, user.password, (err, passwordsMatch) => {
+                    if (passwordsMatch) {
+                        console.log(`-Password matches`);
+                        console.log(`-Rendering "Secrets" Page`);
+                        res.render(`secrets`);
+                    } else {
+                        console.log(`-Password doesn't match`);
+                        console.log(`-Rendering "Login" Page`);
+                        res.render(`login`);
+                    }
+                })
             } else {
-                console.log(`-Password doesn't match`);
+                console.log(`-No such user found`);
                 console.log(`-Rendering "Login" Page`);
                 res.render(`login`);
             }
-        } else {
-            console.log(`-No such user found`);
-            console.log(`-Rendering "Login" Page`);
-            res.render(`login`);
-        }
-    })
-    .catch((err) => {
-        console.log(`-ERROR ENCOUNTERED:`);
-        console.log(err);
-    });
+        })
+        .catch((err) => {
+            console.log(`-ERROR ENCOUNTERED:`);
+            console.log(err);
+        });
+
 });
 
 // -* Listener
