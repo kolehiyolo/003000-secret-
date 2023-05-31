@@ -36,6 +36,8 @@ const userSchema = new mongoose.Schema({
 const session = require(`express-session`);
 const passport = require(`passport`);
 const passportLocalMongoose = require(`passport-local-mongoose`);
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
+const findOrCreate = require(`mongoose-findorcreate`);
 
 // -* Configurations
 app.use(session({
@@ -48,14 +50,43 @@ app.use(passport.initialize()); // Initializing passport with express
 app.use(passport.session()); // Needed for persistent login sessions
 
 userSchema.plugin(passportLocalMongoose); // Including the passport-local-mongoose package into the schema for automatic encryption of essential credentials
+userSchema.plugin(findOrCreate); // TODO Not sure
 const User = new mongoose.model(`User`, userSchema); // Creating a new collection "User" using the user schema
 passport.use(User.createStrategy()); // TODO Not sure
-passport.serializeUser((user, done) =>{
+
+
+// passport.use(new GoogleStrategy({
+//         clientID: process.env.GOOGLE_CLIENT_ID,
+//         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//         callbackURL: `http://localhost:3000/auth/google/secrets`,
+//         // userProfileURL: `https://www.googleapis.com/oauth2/v3/userinfo`
+//     },
+//     function (accessToken, refreshToken, profile, cb) {
+//         console.log(`HEYYYY`);
+//         User.findOrCreate({
+//             googleId: profile.id
+//         }, function (err, user) {
+//             console.log(`FOUNDIT`);
+//             return cb(err, user);
+//         });
+//     }
+// ));
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3001/auth/google/callback",
+    passReqToCallback: true
+}, (request, accessToken, refreshToken, profile, done) => {
+    return done(null, profile);
+}));
+
+passport.serializeUser((user, done) => {
     done(null, user);
-  }); // TODO Not sure
-passport.deserializeUser((user, done) =>{
+}); // TODO Not sure
+passport.deserializeUser((user, done) => {
     done(null, user);
-  }); // TODO Not sure
+}); // TODO Not sure
 
 // ! ----------------------------------------
 // * EXPRESS ROUTES
@@ -64,7 +95,7 @@ app.get(`/`, function (req, res) {
     console.log(`\n`);
     console.log(`GET /`);
 
-    console.log(`-Confirming if User is logged in to determine response`); 
+    console.log(`-Confirming if User is logged in to determine response`);
     if (req.isAuthenticated()) {
         console.log(`-User is logged in`);
         console.log(`-Redirecting to GET /secrets`);
@@ -75,6 +106,46 @@ app.get(`/`, function (req, res) {
         res.render(`home`);
     }
 });
+
+// -* GET Home
+app.get(`/auth/google`, function (req, res) {
+    console.log(`\n`);
+    console.log(`GET /auth/google`);
+
+    console.log(`DO SOMETHING`);
+
+    passport.authenticate(`google`, {
+            scope: [`profile`]
+        }),
+        function (req, res) {
+            console.log(`DO SOMETHIG dude`);
+            res.send("penis");
+        }
+
+    // passport.authenticate(`google`, {
+    //     scope: [`profile`]
+    // }).then("WHAT THE HEY").catch(function(err) {
+    //     console.log('not working'); 
+    //     console.log(err); 
+    // });
+    // res.send("dafuq");
+});
+
+app.get('/auth/google/secrets', function (req, res) {
+    passport.authenticate('google', {
+        failureRedirect: '/login'
+    })(req, res, () => {
+        // Successful authentication, redirect home.
+        res.redirect('/secrets');
+    });
+});
+
+// app.get('/auth/google/callback', 
+//   passport.authenticate('google', { failureRedirect: '/login' }),
+//   function(req, res) {
+//     // Successful authentication, redirect home.
+//     res.redirect('/');
+//   });
 
 // -* GET Login
 app.get(`/login`, function (req, res) {
@@ -111,11 +182,11 @@ app.get(`/secrets`, function (req, res) {
 });
 
 // -* GET Logout
-app.get(`/logout`, function(req, res) {
+app.get(`/logout`, function (req, res) {
     console.log(`\n`);
     console.log(`GET /register`);
-    
-    req.logout((err)=> {
+
+    req.logout((err) => {
         if (err) {
             console.log(`-ERROR ENCOUNTERED:`);
             console.log(err);
@@ -124,7 +195,7 @@ app.get(`/logout`, function(req, res) {
             res.redirect(`/`);
         }
     });
-}) ; 
+});
 
 // -* POST Register
 app.post(`/register`, function (req, res) {
