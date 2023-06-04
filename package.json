@@ -1,36 +1,26 @@
 {
   "name": "2023-05-09-01---secret-plus",
   "version": "1.0.0",
-  "description": "",
+  "description": "- This project is inspired primarily by my Udemy course on Web Development\r     - [The Complete 2023 Web Development Bootcamp](https://www.udemy.com/course/the-complete-web-development-bootcamp/) by Angela Yu\r     - It’s a phenomenal course that has gotten me well past some very essential fundamentals in web dev\r - In the course, there’s Section 37, which is all about **Authentication & Security**\r - This project is the end-product of this section, where I studied the topic and code an example project out of it after\r - I fully expect to have a fully-functioning web application built and live after this section in the course",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kolehiyolo/003001-secret-.git"
+    "url": "git+https://github.com/kolehiyolo/003001-secret-plus.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kolehiyolo/003001-secret-/issues"
+    "url": "https://github.com/kolehiyolo/003001-secret-plus/issues"
   },
-  "homepage": "https://github.com/kolehiyolo/003001-secret-#readme",
+  "homepage": "https://github.com/kolehiyolo/003001-secret-plus#readme",
   "dependencies": {
-    "bcrypt": "^5.1.0",
-    "body-parser": "^1.20.2",
-    "dotenv": "^16.0.3",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
-    "express-session": "^1.17.3",
-    "md5": "^2.3.0",
-    "mongoose": "^7.2.1",
-    "mongoose-encryption": "^2.1.2",
-    "mongoose-findorcreate": "^4.0.0",
     "passport": "^0.6.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^8.0.0"
+    "passport-google-oauth20": "^2.0.0"
   }
 }

@@ -1,16 +1,25 @@
-<%- include('partials/header') %>
-
-
-<div class="jumbotron centered">
-  <div class="container">
-    <i class="fas fa-key fa-6x"></i>
-    <h1 class="display-3">Secrets</h1>
-    <p class="lead">Don't keep your secrets, share them anonymously!</p>
-    <hr>
-    <a class="btn btn-light btn-lg" href="/register" role="button">Register</a>
-    <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
-
-  </div>
-</div>
-
-<%- include('partials/footer') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page</title>
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="/auth/logout">Log Out</a></li>
+      <li><a href="/auth/login">Log In</a></li>
+      <li><a href="/">Home Page</a></li>
+    </ul>
+  </nav>
+  <header>
+    <h1>Net Ninja OAuth Tutorial</h1>
+    <h2>Homepage</h2>
+  </header>
+  <main>
+    <p>Probably the best OAuth tutorials on the planet :)</p>
+  </main>
+</body>
+</html>
