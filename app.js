@@ -1,7 +1,8 @@
 const express = require(`express`);
-const app = express();
-
 const authRoutes = require(`./routes/auth-routes`);
+const passportSetup = require('./config/passport-setup');   
+
+const app = express();
 
 app.set('view engine', 'ejs');
 
@@ -12,10 +13,7 @@ app.get("/", (req, res) => {
     res.render(`home`);
 }) ; 
 
-app.get("/auth/google", (req, res) => {
-    
-}) ; 
 
-app.listen(3000, () => {
-    console.log(`Server listening on port 3000`); 
+app.listen(3001, () => {
+    console.log(`Server listening on port 3001`); 
 });
