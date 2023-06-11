@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
 const session = require(`express-session`);
 const passport = require(`passport`);
 const passportLocalMongoose = require(`passport-local-mongoose`);
-var GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require(`mongoose-findorcreate`);
 
 // -* Configurations
@@ -54,31 +54,15 @@ userSchema.plugin(findOrCreate); // TODO Not sure
 const User = new mongoose.model(`User`, userSchema); // Creating a new collection "User" using the user schema
 passport.use(User.createStrategy()); // TODO Not sure
 
-
-// passport.use(new GoogleStrategy({
-//         clientID: process.env.GOOGLE_CLIENT_ID,
-//         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//         callbackURL: `http://localhost:3000/auth/google/secrets`,
-//         // userProfileURL: `https://www.googleapis.com/oauth2/v3/userinfo`
-//     },
-//     function (accessToken, refreshToken, profile, cb) {
-//         console.log(`HEYYYY`);
-//         User.findOrCreate({
-//             googleId: profile.id
-//         }, function (err, user) {
-//             console.log(`FOUNDIT`);
-//             return cb(err, user);
-//         });
-//     }
-// ));
-
-passport.use(new GoogleStrategy({
+passport.use(
+    new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3001/auth/google/callback",
-    passReqToCallback: true
-}, (request, accessToken, refreshToken, profile, done) => {
-    return done(null, profile);
+    callbackURL: "http://localhost:3000/auth/google/callback",
+},   function(accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
 }));
 
 passport.serializeUser((user, done) => {
@@ -108,28 +92,41 @@ app.get(`/`, function (req, res) {
 });
 
 // -* GET Home
-app.get(`/auth/google`, function (req, res) {
-    console.log(`\n`);
-    console.log(`GET /auth/google`);
+// app.get(`/auth/google`, function (req, res) {
+//     console.log(`\n`);
+//     console.log(`GET /auth/google`);
 
-    console.log(`DO SOMETHING`);
+//     console.log(`DO SOMETHING`);
 
-    passport.authenticate(`google`, {
-            scope: [`profile`]
-        }),
-        function (req, res) {
-            console.log(`DO SOMETHIG dude`);
-            res.send("penis");
-        }
+//     passport.authenticate(`google`, {
+//             scope: [`profile`]
+//         }),
+//         function (req, res) {
+//             console.log(`DO SOMETHIG dude`);
+//             res.send("penis");
+//         }
 
-    // passport.authenticate(`google`, {
-    //     scope: [`profile`]
-    // }).then("WHAT THE HEY").catch(function(err) {
-    //     console.log('not working'); 
-    //     console.log(err); 
-    // });
-    // res.send("dafuq");
-});
+//     // passport.authenticate(`google`, {
+//     //     scope: [`profile`]
+//     // }).then("WHAT THE HEY").catch(function(err) {
+//     //     console.log('not working'); 
+//     //     console.log(err); 
+//     // });
+//     // res.send("dafuq");
+// });
+
+// auth with google+
+app.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile']
+}));
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
+
 
 app.get('/auth/google/secrets', function (req, res) {
     passport.authenticate('google', {
