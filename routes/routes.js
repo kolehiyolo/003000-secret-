@@ -44,6 +44,18 @@ router.get('/auth/google/secrets',
         res.redirect('/');
     });
 
+// -* auth with Facebook
+router.get('/auth/facebook', passport.authenticate('facebook'));
+
+router.get('/auth/facebook/secrets',
+    passport.authenticate('facebook', {
+        failureRedirect: '/login',
+        failureMessage: true
+    }),
+    function (req, res) {
+        res.redirect('/');
+    });
+
 // -* GET Login
 router.get(`/login`, function (req, res) {
     console.log(`\n`);
@@ -100,7 +112,7 @@ router.post(`/register`, function (req, res) {
     console.log(`POST /register`);
 
     User.register({
-        username: req.body.username
+        email: req.body.email
     }, req.body.password, (err, user) => {
         if (err) {
             console.log(`-ERROR ENCOUNTERED:`);
@@ -120,7 +132,7 @@ router.post(`/login`, function (req, res) {
     console.log(`POST /login`);
 
     const user = new User({
-        email: req.body.username,
+        email: req.body.email,
         password: req.body.password
     })
 
