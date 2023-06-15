@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     googleId: String,
     facebookId: String,
+    secrets: [String],
 }); // Defining the user schema
 
 // ! ----------------------------------------
@@ -46,8 +47,9 @@ app.use(session({
 app.use(passport.initialize()); // Initializing passport with express
 app.use(passport.session()); // Needed for persistent login sessions
 
-userSchema.plugin(passportLocalMongoose); // Including the passport-local-mongoose package into the schema for automatic encryption of essential credentials
+// userSchema.plugin(passportLocalMongoose); // Including the passport-local-mongoose package into the schema for automatic encryption of essential credentials
 userSchema.plugin(findOrCreate); // TODO Not sure
+userSchema.plugin(passportLocalMongoose, { usernameField: 'email' });
 const User = new mongoose.model(`User`, userSchema); // Creating a new collection "User" using the user schema
 passport.use(User.createStrategy()); // TODO Not sure
 

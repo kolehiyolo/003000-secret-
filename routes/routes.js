@@ -79,10 +79,93 @@ router.get(`/secrets`, function (req, res) {
     console.log(`\n`);
     console.log(`GET /secrets`);
 
+    // if (req.isAuthenticated()) {
+    //     console.log(`-User is logged in`);
+    //     console.log(`-Rendering secrets page`);
+    //     res.render(`secrets`);
+    // } else {
+    //     console.log(`-User is not logged in`);
+    //     console.log(`-Redirecting to GET /login`);
+    //     res.redirect(`/login`);
+    // }
+
+    // User.find({
+    //     'secrets': {
+    //         $ne: null
+    //     }
+    // }, (err, foundUsers) => {
+    //     if (err) {
+    //         console.log(`-ERROR ENCOUNTERED:`);
+    //         console.log(err);
+    //         res.send(err);
+    //     } else {
+    //         if (foundUsers) {
+    //             res.render("secrets", {
+    //                 usersWithSecrets: foundUsers
+    //             })
+    //         }
+    //     }
+    // });
+
+    async function stuff() {
+        const foundUsers = await User.find({ 'secrets': { $ne: null } });
+        if (foundUsers) {
+          res.render("secrets", { usersWithSecrets: foundUsers });
+        } else {
+          console.log(`-ERROR ENCOUNTERED:`);
+          console.log(err);
+          res.send(err);
+        }
+    }
+
+    stuff()
+});
+
+// -* GET Submit
+router.get(`/submit`, function (req, res) {
+    console.log(`\n`);
+    console.log(`GET /submit`);
+
     if (req.isAuthenticated()) {
         console.log(`-User is logged in`);
-        console.log(`-Rendering secrets page`);
-        res.render(`secrets`);
+        console.log(`-Rendering submit page`);
+        res.render(`submit`);
+    } else {
+        console.log(`-User is not logged in`);
+        console.log(`-Redirecting to GET /login`);
+        res.redirect(`/login`);
+    }
+});
+
+// -* POST Submit
+router.post(`/submit`, function (req, res) {
+    console.log(`\n`);
+    console.log(`POST /submit`);
+
+    if (req.isAuthenticated()) {
+        console.log(`-User is logged in`);
+        console.log(`-Processing secret submission`);
+
+        const submittedSecret = req.body.secret;
+
+        async function stuff() {
+            const foundUser = await User.find({
+                _id: req.user._id
+            });
+            try {
+                console.log(foundUser);
+                console.log(submittedSecret);
+                foundUser[0].secrets.push(submittedSecret);
+                console.log(foundUser[0]);
+                await foundUser[0].save();
+                res.redirect(`/secrets`);
+            } catch (err) {
+                console.log(`-ERROR ENCOUNTERED:`);
+                console.log(err);
+                res.redirect(`/secrets`);
+            }
+        }
+        stuff();
     } else {
         console.log(`-User is not logged in`);
         console.log(`-Redirecting to GET /login`);
