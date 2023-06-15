@@ -1,6 +1,6 @@
 const router = require(`express`).Router();
 const passport = require('passport');
-const User = require('../config/config').User;   
+const User = require('../config/config').User;
 
 // ! ----------------------------------------
 // * EXPRESS ROUTES
@@ -26,21 +26,23 @@ router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile']
 }));
 
-router.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/');
-});
-
-router.get('/auth/google/secrets', function (req, res) {
+router.get('/auth/google/callback',
     passport.authenticate('google', {
         failureRedirect: '/login'
-    })(req, res, () => {
+    }),
+    function (req, res) {
         // Successful authentication, redirect home.
-        res.redirect('/secrets');
+        res.redirect('/');
     });
-});
+
+router.get('/auth/google/secrets',
+    passport.authenticate('google', {
+        failureRedirect: '/login'
+    }),
+    function (req, res) {
+        // Successful authentication, redirect home.
+        res.redirect('/');
+    });
 
 // -* GET Login
 router.get(`/login`, function (req, res) {

@@ -21,7 +21,8 @@ mongoose.connect(`mongodb://127.0.0.1:27017/secretsDB`, {
 }); // ? Establishing connection to local MongoDB instance
 const userSchema = new mongoose.Schema({
     email: String,
-    password: String
+    password: String,
+    googleId: String,
 }); // Defining the user schema
 
 // ! ----------------------------------------
@@ -52,8 +53,9 @@ passport.use(
     new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/callback",
-},   function(accessToken, refreshToken, profile, cb) {
+    callbackURL: "http://localhost:3000/auth/google/secrets",
+},     function(accessToken, refreshToken, profile, cb) {
+    // console.log(profile); 
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
       return cb(err, user);
     });
